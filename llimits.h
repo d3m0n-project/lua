@@ -8,7 +8,7 @@
 #define llimits_h
 
 
-#include <stddef.h>
+//#include <stddef.h>
 
 
 #include "lua.h"
@@ -76,7 +76,7 @@ typedef lu_byte TStatus;
 */
 #if !defined(LUA_USE_C89) && defined(__STDC_VERSION__) && \
     __STDC_VERSION__ >= 199901L
-#include <stdint.h>
+#include "types.h"
 #if defined(UINTPTR_MAX)  /* even in C99 this type is optional */
 #define L_P2I	uintptr_t
 #else  /* no 'intptr'? */
@@ -100,7 +100,6 @@ typedef LUAI_UACINT l_uacInt;
 */
 #if defined LUAI_ASSERT
 #undef NDEBUG
-#include <assert.h>
 #define lua_assert(c)           assert(c)
 #define assert_code(c)		c
 #endif

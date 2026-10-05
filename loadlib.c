@@ -14,9 +14,8 @@
 #include "lprefix.h"
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "stdio.hpp"
+#include "stdlib.h"
 
 #include "lua.h"
 
@@ -98,7 +97,7 @@ static lua_CFunction lsys_sym (lua_State *L, void *lib, const char *sym);
 ** =========================================================================
 */
 
-#include <dlfcn.h>
+// #include <dlfcn.h>
 
 
 static void lsys_unloadlib (void *lib) {
@@ -132,7 +131,7 @@ static lua_CFunction lsys_sym (lua_State *L, void *lib, const char *sym) {
 ** =======================================================================
 */
 
-#include <windows.h>
+// #include <windows.h>
 
 
 /*

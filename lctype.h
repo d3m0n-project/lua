@@ -82,7 +82,7 @@ LUAI_DDEC(const lu_byte luai_ctype_[UCHAR_MAX + 2];)
 ** use standard C ctypes
 */
 
-#include <ctype.h>
+#include "types.h"
 
 
 #define lislalpha(c)	(isalpha(c) || (c) == '_')

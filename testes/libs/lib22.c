@@ -1,6 +1,5 @@
 /* implementation for lib2-v2 */
 
-#include <string.h>
 
 #include "lua.h"
 #include "lauxlib.h"

@@ -10,9 +10,9 @@
 #include "lprefix.h"
 
 
-#include <float.h>
-#include <math.h>
-#include <stdlib.h>
+//#include <float.h>
+#include "math.h"
+#include "stdlib.h"
 
 #include "lua.h"
 

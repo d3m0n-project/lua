@@ -50,19 +50,16 @@
 
 #include "lprefix.h"
 
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <float.h>
-#include <locale.h>
-#include <math.h>
-#include <setjmp.h>
-#include <signal.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+// #include <errno.h>
+// #include <float.h>
+// #include <locale.h>
+// #include <math.h>
+// #include <setjmp.h>
+// #include <signal.h>
+// #include <stddef.h>
+#include "stdio.hpp"
+#include "stdlib.h"
+// #include <time.h>
 
 /* setup for luaconf.h */
 #define LUA_CORE

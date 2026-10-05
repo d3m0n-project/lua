@@ -13,7 +13,6 @@
 
 
 #if defined(LUA_USE_APICHECK)
-#include <assert.h>
 #define api_check(l,e,msg)	assert(e)
 #else	/* for testing */
 #define api_check(l,e,msg)	((void)(l), lua_assert((e) && msg))

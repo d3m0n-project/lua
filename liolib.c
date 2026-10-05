@@ -10,12 +10,11 @@
 #include "lprefix.h"
 
 
-#include <ctype.h>
-#include <errno.h>
-#include <locale.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "types.h"
+//#include <errno.h>
+//#include <locale.h>
+#include "stdio.hpp"
+#include "stdlib.h"
 
 #include "lua.h"
 
@@ -116,7 +115,7 @@ static int l_checkmode (const char *mode) {
 
 #if defined(LUA_USE_POSIX) || defined(LUA_USE_OFF_T)	/* { */
 
-#include <sys/types.h>
+#include "types.h"
 
 #define l_fseek(f,o,w)		fseeko(f,o,w)
 #define l_ftell(f)		ftello(f)

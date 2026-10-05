@@ -10,8 +10,7 @@
 #include "lprefix.h"
 
 
-#include <stddef.h>
-#include <string.h>
+// #include <stddef.h>
 
 #include "lua.h"
 
@@ -29,7 +28,7 @@
 
 
 
-#define fromstate(L)	(cast(LX *, cast(lu_byte *, (L)) - offsetof(LX, l)))
+#define fromstate(L)	(cast(LX *, cast(lu_byte *, (L)) - OFFSETOF(LX, l)))
 
 
 /*
@@ -282,7 +281,7 @@ LUA_API lua_State *lua_newthread (lua_State *L) {
   lua_lock(L);
   luaC_checkGC(L);
   /* create new thread */
-  o = luaC_newobjdt(L, LUA_TTHREAD, sizeof(LX), offsetof(LX, l));
+  o = luaC_newobjdt(L, LUA_TTHREAD, sizeof(LX), OFFSETOF(LX, l));
   L1 = gco2th(o);
   /* anchor it on L stack */
   setthvalue2s(L, L->top.p, L1);

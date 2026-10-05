@@ -9,10 +9,8 @@
 
 #include "lprefix.h"
 
-
-#include <setjmp.h>
-#include <stdlib.h>
-#include <string.h>
+#include "runtime.h"
+#include "stdlib.h"
 
 #include "lua.h"
 

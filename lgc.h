@@ -8,7 +8,7 @@
 #define lgc_h
 
 
-#include <stddef.h>
+//#include <stddef.h>
 
 
 #include "lobject.h"

@@ -9,11 +9,10 @@
 #include "lprefix.h"
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "stdio.hpp"
+#include "stdlib.h"
 
-#include <signal.h>
+// #include <signal.h>
 
 #include "lua.h"
 
@@ -428,13 +427,13 @@ static int handle_luainit (lua_State *L) {
 
 #if defined(LUA_USE_POSIX)	/* { */
 
-#include <unistd.h>
+// #include <unistd.h>
 #define lua_stdin_is_tty()	isatty(0)
 
 #elif defined(LUA_USE_WINDOWS)	/* }{ */
 
-#include <io.h>
-#include <windows.h>
+// #include <io.h>
+// #include <windows.h>
 
 #define lua_stdin_is_tty()	_isatty(_fileno(stdin))
 
@@ -462,8 +461,8 @@ static int handle_luainit (lua_State *L) {
 #if defined(LUA_USE_READLINE)	/* { */
 /* Lua will be linked with '-lreadline' */
 
-#include <readline/readline.h>
-#include <readline/history.h>
+// #include <readline/readline.h>
+// #include <readline/history.h>
 
 #define lua_initreadline(L)	((void)L, rl_readline_name="lua")
 #define lua_readline(buff,prompt)	((void)buff, readline(prompt))
@@ -510,7 +509,7 @@ static void lua_freeline (char *line) {
 #if defined(LUA_USE_DLOPEN) && defined(LUA_READLINELIB)		/* { */
 /* try to load 'readline' dynamically */
 
-#include <dlfcn.h>
+// #include <dlfcn.h>
 
 static void lua_initreadline (lua_State *L) {
   const char *rllib = l_getenv(LUA_RLLIB_VAR);  /* name of readline library */

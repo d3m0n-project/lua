@@ -10,11 +10,10 @@
 #include "lprefix.h"
 
 
-#include <errno.h>
-#include <locale.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+// #include <errno.h>
+// #include <locale.h>
+#include "stdlib.h"
+// #include <time.h>
 
 #include "lua.h"
 
@@ -104,7 +103,7 @@
 
 #if defined(LUA_USE_POSIX)	/* { */
 
-#include <unistd.h>
+// #include <unistd.h>
 
 #define LUA_TMPNAMBUFSIZE	32
 

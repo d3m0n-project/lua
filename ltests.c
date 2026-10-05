@@ -10,10 +10,9 @@
 #include "lprefix.h"
 
 
-#include <setjmp.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+// #include <setjmp.h>
+#include "stdio.hpp"
+#include "stdlib.h"
 
 #include "lua.h"
 
@@ -282,7 +281,6 @@ void *debug_realloc (void *ud, void *b, size_t oldsize, size_t size) {
 ** ======================================================================
 */
 
-#include <assert.h>
 
 /*
 ** Check GC invariants. For incremental mode, a black object cannot
@@ -2147,8 +2145,8 @@ static int coresume (lua_State *L) {
 
 #else
 
-#include <unistd.h>
-#include <fcntl.h>
+// #include <unistd.h>
+// #include <fcntl.h>
 
 static int nonblock (lua_State *L) {
   FILE *f = cast(luaL_Stream*, luaL_checkudata(L, 1, LUA_FILEHANDLE))->f;

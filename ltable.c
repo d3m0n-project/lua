@@ -23,8 +23,7 @@
 ** Hence even when the load factor reaches 100%, performance remains good.
 */
 
-#include <math.h>
-#include <string.h>
+// #include <math.h>
 
 #include "lua.h"
 
@@ -55,7 +54,7 @@ typedef struct { Node *dummy; Node follows_pNode; } Limbox_aux;
 
 typedef union {
   Node *lastfree;
-  char padding[offsetof(Limbox_aux, follows_pNode)];
+  char padding[OFFSETOF(Limbox_aux, follows_pNode)];
 } Limbox;
 
 #define haslastfree(t)     ((t)->lsizenode >= LIMFORLAST)

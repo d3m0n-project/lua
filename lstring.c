@@ -10,7 +10,6 @@
 #include "lprefix.h"
 
 
-#include <string.h>
 
 #include "lua.h"
 
@@ -150,10 +149,10 @@ size_t luaS_sizelngstr (size_t len, int kind) {
   switch (kind) {
     case LSTRREG:  /* regular long string */
       /* don't need 'falloc'/'ud', but need space for content */
-      return offsetof(TString, falloc) + (len + 1) * sizeof(char);
+      return OFFSETOF(TString, falloc) + (len + 1) * sizeof(char);
     case LSTRFIX:  /* fixed external long string */
       /* don't need 'falloc'/'ud' */
-      return offsetof(TString, falloc);
+      return OFFSETOF(TString, falloc);
     default:  /* external long string with deallocation */
       lua_assert(kind == LSTRMEM);
       return sizeof(TString);
@@ -181,7 +180,7 @@ TString *luaS_createlngstrobj (lua_State *L, size_t l) {
   TString *ts = createstrobj(L, totalsize, LUA_VLNGSTR, G(L)->seed);
   ts->u.lnglen = l;
   ts->shrlen = LSTRREG;  /* signals that it is a regular long string */
-  ts->contents = cast_charp(ts) + offsetof(TString, falloc);
+  ts->contents = cast_charp(ts) + OFFSETOF(TString, falloc);
   ts->contents[l] = '\0';  /* ending 0 */
   return ts;
 }

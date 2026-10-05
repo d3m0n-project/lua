@@ -8,8 +8,8 @@
 #define ltests_h
 
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "stdio.hpp"
+#include "stdlib.h"
 
 /* test Lua with compatibility code */
 #define LUA_COMPAT_MATHLIB

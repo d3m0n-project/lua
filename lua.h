@@ -9,7 +9,8 @@
 #ifndef lua_h
 #define lua_h
 
-#include <stddef.h>
+// #include <stddef.h>
+#include "types.h"
 
 
 #define LUA_COPYRIGHT	LUA_RELEASE "  Copyright (C) 1994-2026 Lua.org, PUC-Rio"

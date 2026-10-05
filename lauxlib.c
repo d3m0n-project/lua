@@ -10,10 +10,9 @@
 #include "lprefix.h"
 
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+//#include <errno.h>
+#include "stdio.hpp"
+#include "stdlib.h"
 
 
 /*
@@ -269,7 +268,7 @@ LUALIB_API int luaL_fileresult (lua_State *L, int stat, const char *fname) {
 
 #if defined(LUA_USE_POSIX)
 
-#include <sys/wait.h>
+//#include <sys/wait.h>
 
 /*
 ** use appropriate macros to interpret 'pclose' return status
@@ -1148,7 +1147,7 @@ static void warnfon (void *ud, const char *message, int tocont) {
 */
 #if !defined(luai_makeseed)
 
-#include <time.h>
+//#include <time.h>
 
 
 /* Size for the buffer, in bytes */

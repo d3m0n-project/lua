@@ -10,14 +10,13 @@
 #include "lprefix.h"
 
 
-#include <ctype.h>
-#include <float.h>
-#include <locale.h>
-#include <math.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "types.h"
+// #include <float.h>
+// #include <locale.h>
+// #include <math.h>
+// #include <stddef.h>
+#include "stdio.hpp"
+#include "stdlib.h"
 
 #include "lua.h"
 
@@ -1528,7 +1527,7 @@ static KOption getoption (Header *h, const char **fmt, size_t *size) {
     case '>': h->islittle = 0; break;
     case '=': h->islittle = nativeendian.little; break;
     case '!': {
-      const size_t maxalign = offsetof(struct cD, u);
+      const size_t maxalign = OFFSETOF(struct cD, u);
       h->maxalign = getnumlimit(h, fmt, maxalign);
       break;
     }

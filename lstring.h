@@ -35,7 +35,7 @@
 ** itself (including final '\0').
 */
 #define sizestrshr(l)  \
-	(offsetof(TString, contents) + ((l) + 1) * sizeof(char))
+	(OFFSETOF(TString, contents) + ((l) + 1) * sizeof(char))
 
 
 #define luaS_newliteral(L, s)	(luaS_newlstr(L, "" s, \
