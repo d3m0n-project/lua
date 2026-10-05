@@ -8,6 +8,7 @@
 #define LUA_CORE
 
 #include "lprefix.h"
+#include "stdlib.h"
 
 
 /*

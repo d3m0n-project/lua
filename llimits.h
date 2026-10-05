@@ -12,6 +12,7 @@
 
 
 #include "lua.h"
+#include "math.h"
 
 
 #define l_numbits(t)	cast_int(sizeof(t) * CHAR_BIT)

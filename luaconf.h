@@ -8,7 +8,7 @@
 #ifndef luaconf_h
 #define luaconf_h
 
-// #include <stddef.h>
+#include "locale.h"
 
 
 /*
@@ -67,7 +67,7 @@
 ** use 'readline'.
 */
 #if defined(LUA_USE_LINUX)
-#define LUA_USE_POSIX
+//#define LUA_USE_POSIX
 #define LUA_USE_DLOPEN		/* needs an extra library: -ldl */
 #if !defined(LUA_READLINELIB)
 #define LUA_READLINELIB		"libreadline.so"

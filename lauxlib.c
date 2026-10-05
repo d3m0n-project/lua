@@ -10,7 +10,7 @@
 #include "lprefix.h"
 
 
-//#include <errno.h>
+#include "runtime.h"
 #include "stdio.hpp"
 #include "stdlib.h"
 
