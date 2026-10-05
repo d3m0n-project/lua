@@ -11,8 +11,7 @@
 
 
 #include "types.h"
-//#include <errno.h>
-//#include <locale.h>
+#include "runtime.h"
 #include "stdio.hpp"
 #include "stdlib.h"
 
