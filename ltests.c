@@ -10,7 +10,6 @@
 #include "lprefix.h"
 
 
-#include <limits.h>
 #include <setjmp.h>
 #include <stdio.h>
 #include <stdlib.h>

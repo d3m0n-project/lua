@@ -80,7 +80,7 @@ MYLDFLAGS= -Wl,-E
 MYLIBS= -ldl
 
 
-CC= gcc
+CC= d3c
 # (Optionally we can use -march=native -mno-avx512f.)
 CFLAGS= -Wall -O2 $(MYCFLAGS) -fno-stack-protector -fno-common
 AR= ar rc

@@ -7,7 +7,6 @@
 #ifndef lundump_h
 #define lundump_h
 
-#include <limits.h>
 
 #include "llimits.h"
 #include "lobject.h"

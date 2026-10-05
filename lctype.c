@@ -14,7 +14,6 @@
 
 #if !LUA_USE_CTYPE	/* { */
 
-#include <limits.h>
 
 
 #if defined (LUA_UCID)		/* accept UniCode IDentifiers? */

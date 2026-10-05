@@ -10,7 +10,6 @@
 #include "lprefix.h"
 
 
-#include <limits.h>
 #include <stddef.h>
 #include <string.h>
 
