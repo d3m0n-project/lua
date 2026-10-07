@@ -77,7 +77,7 @@ LOCAL = $(TESTS) $(CWARNS)
 # (For 32-bit, add option "-m32" to MYCFLAGS and MYLDFLAGS.)
 MYCFLAGS= $(LOCAL) -std=c99 -DLUA_USE_LINUX -DLUA_32BITS
 MYLDFLAGS= -Wl,-E
-MYLIBS= -ldl
+MYLIBS= #-ldl
 
 
 CC= d3c

@@ -68,23 +68,10 @@
 */
 #if defined(LUA_USE_LINUX)
 //#define LUA_USE_POSIX
-#define LUA_USE_DLOPEN		/* needs an extra library: -ldl */
+//#define LUA_USE_DLOPEN		/* needs an extra library: -ldl */
 #if !defined(LUA_READLINELIB)
 #define LUA_READLINELIB		"libreadline.so"
 #endif
-#endif
-
-
-#if defined(LUA_USE_MACOSX)
-#define LUA_USE_POSIX
-#define LUA_USE_DLOPEN		/* macOS does not need -ldl */
-#define LUA_USE_READLINE	/* needs an extra library: -lreadline */
-#endif
-
-
-#if defined(LUA_USE_IOS)
-#define LUA_USE_POSIX
-#define LUA_USE_DLOPEN
 #endif
 
 
