@@ -3,6 +3,8 @@
 
 # == CHANGE THE SETTINGS BELOW TO SUIT YOUR ENVIRONMENT =======================
 
+D3M0N_BIN_DIR	= ../bin/
+
 # Warnings valid for both C and C++
 CWARNSCPP= \
 	-Wfatal-errors \
@@ -112,6 +114,9 @@ ALL_A= $(CORE_T)
 
 all:	$(ALL_T)
 	touch all
+
+export: all
+	cp $(LUA_T) "$(D3M0N_BIN_DIR)/$(LUA_T)"
 
 o:	$(ALL_O)
 

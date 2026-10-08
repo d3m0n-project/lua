@@ -9,3 +9,5 @@ make
 ```
 
 You need to have `d3c` installed on your machine. Check [here](../../../compiler/README.md) for more information.
+
+The compiled lua executable will be automatically placed in `/programs/bin/`
