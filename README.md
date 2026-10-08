@@ -10,4 +10,11 @@ make
 
 You need to have `d3c` installed on your machine. Check [here](../../../compiler/README.md) for more information.
 
+
+## Installation
+
+```bash
+make export
+```
+
 The compiled lua executable will be automatically placed in `/programs/bin/`
