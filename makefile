@@ -118,6 +118,9 @@ all:	$(ALL_T)
 export: all
 	cp $(LUA_T) "$(D3M0N_BIN_DIR)/$(LUA_T)"
 
+re_export: clean all
+	cp $(LUA_T) "$(D3M0N_BIN_DIR)/$(LUA_T)"
+
 o:	$(ALL_O)
 
 a:	$(ALL_A)
