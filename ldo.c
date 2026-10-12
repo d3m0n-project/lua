@@ -1146,6 +1146,7 @@ static void f_parser (lua_State *L, void *ud) {
   else {
     checkmode(L, mode, "text");
     cl = luaY_parser(L, p->z, anchor, &p->buff, &p->dyd, p->name, c);
+    printf("cl: %p\n", cl);
   }
   L->top.p = restorestack(L, otop);  /* restore stack */
   setclLvalue2s(L, L->top.p++, cl);  /* push closure */
