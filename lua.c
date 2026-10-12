@@ -485,9 +485,26 @@ static char *lua_readline (char *buff, const char *prompt) {
   if (l_readline != NULL)  /* is there a 'readline'? */
     return (*l_readline)(prompt);  /* use it */
   else {  /* emulate 'readline' over 'buff' */
+    size_t len = 0;
+    int n;
     fputs(prompt, stdout);
     fflush(stdout);  /* show prompt */
-    return fgets(buff, LUA_MAXINPUT, stdin);  /* read line */
+    while (len < LUA_MAXINPUT - 1) {
+      n = read(0, buff + len, 1);
+      if (n < 0)
+        return NULL;
+      if (n == 0) {
+        if (len == 0)
+          return NULL;
+        break;
+      }
+      if (buff[len] == '\r')
+        buff[len] = '\n';
+      if (buff[len++] == '\n')
+        break;
+    }
+    buff[len] = '\0';
+    return buff;
   }
 }
 
