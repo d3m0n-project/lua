@@ -17,6 +17,6 @@ jobs:
     - name: compiler install
       run: git clone https://github.com/d3m0n-project/d3m0n_os
     - name: make
-      run: make -C d3m0n_os/compiler
+      run: make -C d3m0n_os/compiler && export PATH="$PATH:$HOME/com.ares"
     - name: build
       run: make
