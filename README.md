@@ -1,4 +1,5 @@
-# Lua
+# Lua 
+[![Build](https://github.com/d3m0n-project/lua/actions/workflows/build.yml/badge.svg)](https://github.com/d3m0n-project/lua/actions/workflows/build.yml)
 
 This repository is a fork of `https://github.com/lua/lua`, for d3m0n os.
 
