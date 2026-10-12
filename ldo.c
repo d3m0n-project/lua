@@ -90,7 +90,7 @@ static void LUAI_TRY (lua_State *L, lua_longjmp *c, Pfunc f, void *ud) {
 }
 
 
-#elif defined(LUA_USE_POSIX)				/* }{ */
+#elif defined(LUA_USE_POSIX) || defined(LUA_USE_LINUX)	/* }{ */
 
 /* in POSIX, use _longjmp/_setjmp (more efficient) */
 #define LUAI_THROW(L,c)		_longjmp((c)->b, 1)
@@ -1146,7 +1146,6 @@ static void f_parser (lua_State *L, void *ud) {
   else {
     checkmode(L, mode, "text");
     cl = luaY_parser(L, p->z, anchor, &p->buff, &p->dyd, p->name, c);
-    printf("cl: %p\n", cl);
   }
   L->top.p = restorestack(L, otop);  /* restore stack */
   setclLvalue2s(L, L->top.p++, cl);  /* push closure */

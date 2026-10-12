@@ -77,14 +77,14 @@ LOCAL = $(TESTS) $(CWARNS)
 # For C89, "-std=c89 -DLUA_USE_C89"
 # Note that Linux/Posix options are not compatible with C89
 # (For 32-bit, add option "-m32" to MYCFLAGS and MYLDFLAGS.)
-MYCFLAGS= $(LOCAL) -std=c99 -DLUA_USE_LINUX -DLUA_32BITS -DLUA_USE_APICHECK -DLUAI_ASSERT -g3
-MYLDFLAGS= -Wl,-E -g3
+MYCFLAGS= $(LOCAL) -std=c99 -DLUA_USE_LINUX -DLUA_32BITS
+MYLDFLAGS= -Wl,-E
 MYLIBS= #-ldl
 
 
 CC= d3c
 # (Optionally we can use -march=native -mno-avx512f.)
-CFLAGS= -Wall -O2 $(MYCFLAGS) -fno-stack-protector -fno-common -g3
+CFLAGS= -Wall -O2 $(MYCFLAGS) -fno-stack-protector -fno-common
 AR= ar rc
 RANLIB= ranlib
 RM= rm -f
@@ -105,7 +105,7 @@ LIB_O=	lbaselib.o ldblib.o liolib.o lmathlib.o loslib.o ltablib.o lstrlib.o \
 	lutf8lib.o loadlib.o lcorolib.o linit.o
 
 LUA_T=	lua
-LUA_O=	lua.o
+LUA_O=	lua.o# malloc_override.o
 
 
 ALL_T= $(CORE_T) $(LUA_T)
@@ -131,6 +131,9 @@ $(CORE_T): $(CORE_O) $(AUX_O) $(LIB_O)
 
 $(LUA_T): $(LUA_O) $(CORE_T)
 	$(CC) -o $@ $(MYLDFLAGS) $(LUA_O) $(CORE_T) $(LIBS) $(MYLIBS) $(DL)
+
+#malloc_override.o: ../../../compiler/sdk/malloc.c
+#	$(CC) $(CFLAGS) -c $< -o $@
 
 
 clean:
