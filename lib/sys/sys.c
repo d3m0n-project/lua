@@ -146,15 +146,15 @@ static int l_remove(lua_State *L)
 }
 
 
-static int l_surface_create(lua_State *L)
+static int	l_surface_create(lua_State *L)
 {
 	uint32_t width = (uint32_t)luaL_checkinteger(L, 1);
 	uint32_t height = (uint32_t)luaL_checkinteger(L, 2);
 
 	uint8_t *surface = NULL;
 	int pitch = 0;
-	int ret = surface_create(width, height, &surface, &pitch);
 
+	int ret = surface_create(width, height, &surface, &pitch);
 	lua_pushlightuserdata(L, surface);
 	lua_pushinteger(L, pitch);
 	lua_pushinteger(L, ret);
