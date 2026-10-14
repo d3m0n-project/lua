@@ -20,6 +20,8 @@
 #include "lualib.h"
 #include "llimits.h"
 
+#include "lib/libs.h"
+
 
 #if !defined(LUA_PROGNAME)
 #define LUA_PROGNAME		"lua"
@@ -770,6 +772,13 @@ static int pmain (lua_State *L) {
   lua_gc(L, LUA_GCGEN);  /* ...in generational mode */
   if (handle_luainit(L) != LUA_OK)  /* run LUA_INIT */
     return 0;  /* error running LUA_INIT */
+
+
+  // custom d3m0n modules loading
+  register_all_custom_modules(L);
+
+
+
   if (!runargs(L, argv, optlim))  /* execute arguments -e, -l, and -W */
     return 0;  /* something failed */
   if (script > 0) {  /* execute main script (if there is one) */

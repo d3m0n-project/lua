@@ -142,6 +142,7 @@ l_noret luaD_throw (lua_State *L, TStatus errcode) {
       abort();
     }
   }
+  while (1);
 }
 
 

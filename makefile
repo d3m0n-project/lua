@@ -104,12 +104,14 @@ AUX_O=	lauxlib.o
 LIB_O=	lbaselib.o ldblib.o liolib.o lmathlib.o loslib.o ltablib.o lstrlib.o \
 	lutf8lib.o loadlib.o lcorolib.o linit.o
 
+CUSTOM_LIBS_O= $(shell find lib -name Makefile | awk -F/ '{ printf "%s/%s/lib_%s.o ", $$1, $$2, $$2 }')
+
 LUA_T=	lua
-LUA_O=	lua.o# malloc_override.o
+LUA_O=	lua.o
 
 
 ALL_T= $(CORE_T) $(LUA_T)
-ALL_O= $(CORE_O) $(LUA_O) $(AUX_O) $(LIB_O)
+ALL_O= $(CORE_O) $(LUA_O) $(AUX_O) $(LIB_O) $(CUSTOM_LIBS_O)
 ALL_A= $(CORE_T)
 
 all:	$(ALL_T)
@@ -125,15 +127,17 @@ o:	$(ALL_O)
 
 a:	$(ALL_A)
 
-$(CORE_T): $(CORE_O) $(AUX_O) $(LIB_O)
+$(CORE_T): $(CORE_O) $(AUX_O) $(LIB_O) $(CUSTOM_LIBS_O)
 	$(AR) $@ $?
 	$(RANLIB) $@
 
 $(LUA_T): $(LUA_O) $(CORE_T)
 	$(CC) -o $@ $(MYLDFLAGS) $(LUA_O) $(CORE_T) $(LIBS) $(MYLIBS) $(DL)
 
-#malloc_override.o: ../../../compiler/sdk/malloc.c
-#	$(CC) $(CFLAGS) -c $< -o $@
+
+# custom libs
+lib/%.o:
+	$(MAKE) -C $(shell dirname $@)
 
 
 clean:

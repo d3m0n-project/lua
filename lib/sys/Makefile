@@ -8,8 +8,7 @@ DEFINES			= -DLUA_32BITS
 all: $(OUT)
 
 $(OUT): $(C_FILE)
-	@$(CC) $(INCLUDE) $(DEFINES) -c $^ -o $@
-	@echo "$(shell pwd)"
+	$(CC) $(INCLUDE) $(DEFINES) -c $^ -o $@
 
 clean:
 	rm -rf $(OUT)
