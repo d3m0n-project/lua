@@ -774,10 +774,8 @@ static int pmain (lua_State *L) {
     return 0;  /* error running LUA_INIT */
 
 
-  // custom d3m0n modules loading
+  // custom d3m0n C and lua modules loading
   register_all_custom_modules(L);
-
-
 
   if (!runargs(L, argv, optlim))  /* execute arguments -e, -l, and -W */
     return 0;  /* something failed */
