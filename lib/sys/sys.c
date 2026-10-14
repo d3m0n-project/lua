@@ -5,6 +5,8 @@
 #include "sys.h"
 #include "stdlib.h"
 
+#include "c_functions.c"
+
 static int l_exit(lua_State *L)
 {
 	int ret_code = (int)luaL_checkinteger(L, 1);
@@ -261,6 +263,11 @@ static const luaL_Reg sys_functions[] = {
 	{NULL, NULL}
 };
 
+static const luaL_Reg c_functions[] = {
+	{"c_buffer_uint32_set", l_c_buffer_uint32_set},
+	{NULL, NULL}
+};
+
 int	luaopen_sys_native(lua_State *L)
 {
 	size_t count = sizeof(sys_functions) / sizeof(sys_functions[0]) - 1;
@@ -271,5 +278,6 @@ int	luaopen_sys_native(lua_State *L)
 	}
 
 	luaL_newlib(L, sys_functions);
+	luaL_setfuncs(L, c_functions, 0);
 	return 1;
 }
