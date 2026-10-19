@@ -176,7 +176,7 @@ static int	l_surface_update(lua_State *L)
 static int l_sbrk(lua_State *L)
 {
 	size_t increment = (size_t)luaL_checkinteger(L, 1);
-	lua_pushinteger(L, sbrk(increment));
+	lua_pushinteger(L, (int)sbrk(increment));
 	return 1;
 }
 
@@ -238,6 +238,28 @@ static int	l_pstate(lua_State *L)
 	return 1;
 }
 
+static int	l_evtpop(lua_State *L)
+{
+	event_t out = {0};
+	int ret = evtpop(&out);
+	if (ret != 0) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	// [type, timestamp, x, y]
+	lua_createtable(L, 0, 4);
+	lua_pushinteger(L, out.type);
+	lua_setfield(L, -2, "type");
+	lua_pushinteger(L, (lua_Integer)out.timestamp);
+	lua_setfield(L, -2, "timestamp");
+	lua_pushinteger(L, out.x);
+	lua_setfield(L, -2, "x");
+	lua_pushinteger(L, out.y);
+	lua_setfield(L, -2, "y");
+	return 1;
+}
+
 static const luaL_Reg sys_functions[] = {
 	{"exit",			l_exit},
 	{"read",			l_read},
@@ -260,6 +282,7 @@ static const luaL_Reg sys_functions[] = {
 	{"exec",			l_exec},
 	{"kill",			l_kill},
 	{"pstate",			l_pstate},
+	{"evtpop",			l_evtpop},
 	{NULL, NULL}
 };
 
