@@ -131,6 +131,28 @@ static lua_Integer intarith (lua_State *L, int op, lua_Integer v1,
 }
 
 
+#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
+lua_Number lua_floatpow (lua_Number a, lua_Number b) {
+  if (a < 0 && (b != b || b < -2147483648.0f ||
+                b >= 2147483648.0f || b != (lua_Number)(int)b))
+    return (lua_Number)__builtin_nanf("");
+  if (b == 0.5f || b == -0.5f) {
+    lua_Number root;
+    int i;
+    if (a < 0)
+      return (lua_Number)__builtin_nanf("");
+    if (a == 0)
+      return (b < 0) ? (lua_Number)__builtin_inff() : 0;
+    root = (a < 1) ? 1 : a;
+    for (i = 0; i < 32; i++)
+      root = (root + a / root) * 0.5f;
+    return (b < 0) ? 1 / root : root;
+  }
+  return l_mathop(pow)(a, b);
+}
+#endif
+
+
 static lua_Number numarith (lua_State *L, int op, lua_Number v1,
                                                   lua_Number v2) {
   switch (op) {
@@ -213,10 +235,6 @@ static int isneg (const char **s) {
 ** Lua's implementation for 'lua_strx2number'
 ** ===================================================================
 */
-
-#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
-#undef lua_strx2number  /* use Lua's parser instead of a target strtof */
-#endif
 
 #if !defined(lua_strx2number)
 
@@ -303,6 +321,7 @@ static const char *l_str2dloc (const char *s, lua_Number *result, int mode) {
     int exponent = 0;
     int expsign = 1;
     int dot = lua_getlocaledecpoint();
+    union { lua_Number n; unsigned int u; } valuebits;
     while (lisspace(cast_uchar(*s))) s++;
     negative = isneg(&s);
     while (lisdigit(cast_uchar(*s))) {
@@ -344,6 +363,20 @@ static const char *l_str2dloc (const char *s, lua_Number *result, int mode) {
         s = ep;  /* an invalid exponent is not part of the numeral */
     }
     while (exponent > 0) {
+      valuebits.n = value;
+      if ((valuebits.u & 0x7f800000U) == 0x7f800000U) {
+        if ((valuebits.u & 0x007fffffU) != 0)
+          value = (lua_Number)__builtin_nanf("");
+        else
+          value = negative ? -(lua_Number)__builtin_inff()
+                           : (lua_Number)__builtin_inff();
+        break;
+      }
+      if (value > 3.4028234e37f || value < -3.4028234e37f) {
+        value = negative ? -(lua_Number)__builtin_inff()
+                         : (lua_Number)__builtin_inff();
+        break;  /* avoid overflowing during software float arithmetic */
+      }
       value *= 10.0f;
       exponent--;
     }
@@ -489,171 +522,31 @@ int luaO_utf8esc (char *buff, l_uint32 x) {
 ** like an integer (without a decimal point or an exponent), add ".0" to
 ** its end.
 */
-/*
-** Some freestanding C libraries do not support floating-point conversions
-** in snprintf.  In that case, produce a decimal representation directly.
-** Nine significant digits are enough to round-trip a single-precision float.
-** Build the exact decimal digits from the IEEE-754 representation so this
-** also works on targets with incomplete software floating-point helpers.
-*/
-static int fallbackFloatToString (lua_Number n, char *buff, int precision) {
+static int tostringbuffFloat (lua_Number n, char *buff) {
 #if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
-  union { lua_Number n; unsigned int u; } bits;
-  unsigned char decimal[128];  /* little-endian decimal digits */
-  unsigned int mantissa;
-  unsigned int exponentbits;
-  int binaryexponent;
-  int scale = 0;
-  int ndeci = 0;
-  int exponent;
-  int digits[9];
-  int ndigits = precision;
-  int i;
-  int len = 0;
-  int negative;
-  bits.n = n;
-  negative = (bits.u >> 31) != 0;
-  exponentbits = (bits.u >> 23) & 0xff;
-  mantissa = bits.u & 0x7fffff;
-  if (exponentbits == 0xff && mantissa != 0) {  /* NaN */
-    memcpy(buff, "nan", 4);
+  union { lua_Number n; unsigned int u; } value;
+  value.n = n;
+  if ((value.u & 0x7f800000U) == 0x7f800000U) {
+    if ((value.u & 0x007fffffU) != 0) {
+      memcpy(buff, "nan", 4);
+      return 3;
+    }
+    if ((value.u & 0x80000000U) != 0) {
+      memcpy(buff, "-inf", 5);
+      return 4;
+    }
+    memcpy(buff, "inf", 4);
     return 3;
   }
-  if (exponentbits == 0xff) {  /* infinity */
-    if (negative)
-      buff[len++] = '-';
-    memcpy(buff + len, "inf", 4);
-    return len + 3;
-  }
-  if (negative)
-    buff[len++] = '-';
-  if (exponentbits == 0 && mantissa == 0) {
-    buff[len++] = '0';
-    buff[len++] = lua_getlocaledecpoint();
-    buff[len++] = '0';
-    buff[len] = '\0';
-    return len;
-  }
-  if (exponentbits == 0)  /* subnormal */
-    binaryexponent = -149;
-  else {
-    mantissa |= 1u << 23;
-    binaryexponent = cast_int(exponentbits) - 127 - 23;
-  }
-  while (mantissa != 0) {
-    decimal[ndeci++] = cast(unsigned char, mantissa % 10);
-    mantissa /= 10;
-  }
-  if (binaryexponent >= 0) {
-    for (i = 0; i < binaryexponent; i++) {
-      int j;
-      int carry = 0;
-      for (j = 0; j < ndeci; j++) {
-        int d = decimal[j] * 2 + carry;
-        decimal[j] = cast(unsigned char, d % 10);
-        carry = d / 10;
-      }
-      if (carry != 0)
-        decimal[ndeci++] = cast(unsigned char, carry);
-    }
-  }
-  else {
-    scale = -binaryexponent;
-    for (i = 0; i < scale; i++) {
-      int j;
-      int carry = 0;
-      for (j = 0; j < ndeci; j++) {
-        int d = decimal[j] * 5 + carry;
-        decimal[j] = cast(unsigned char, d % 10);
-        carry = d / 10;
-      }
-      if (carry != 0)
-        decimal[ndeci++] = cast(unsigned char, carry);
-    }
-  }
-  exponent = ndeci - 1 - scale;
-  for (i = 0; i < ndigits; i++)
-    digits[i] = (i < ndeci) ? decimal[ndeci - 1 - i] : 0;
-  if (ndeci > ndigits && decimal[ndeci - 1 - ndigits] >= 5) {
-    /* round, carrying into the exponent if necessary */
-    for (i = ndigits - 1; i >= 0 && digits[i] == 9; i--)
-      digits[i] = 0;
-    if (i < 0) {
-      digits[0] = 1;
-      exponent++;
-    }
-    else
-      digits[i]++;
-  }
-  while (ndigits > 1 && digits[ndigits - 1] == 0)
-    ndigits--;
-  if (exponent < -4 || exponent >= precision) {  /* scientific notation */
-    buff[len++] = cast_char('0' + digits[0]);
-    if (ndigits > 1) {
-      buff[len++] = lua_getlocaledecpoint();
-      for (i = 1; i < ndigits; i++)
-        buff[len++] = cast_char('0' + digits[i]);
-    }
-    buff[len++] = 'e';
-    buff[len++] = (exponent < 0) ? '-' : '+';
-    if (exponent < 0)
-      exponent = -exponent;
-    if (exponent >= 100)
-      buff[len++] = cast_char('0' + exponent / 100);
-    if (exponent >= 10)
-      buff[len++] = cast_char('0' + (exponent / 10) % 10);
-    else
-      buff[len++] = '0';
-    buff[len++] = cast_char('0' + exponent % 10);
-  }
-  else if (exponent >= 0) {  /* fixed notation with digits before the point */
-    int before = exponent + 1;
-    for (i = 0; i < before; i++)
-      buff[len++] = cast_char('0' + ((i < ndigits) ? digits[i] : 0));
-    if (ndigits > before) {
-      buff[len++] = lua_getlocaledecpoint();
-      for (i = before; i < ndigits; i++)
-        buff[len++] = cast_char('0' + digits[i]);
-    }
-  }
-  else {  /* fixed notation with leading zeroes after the point */
-    int zeros = -exponent - 1;
-    buff[len++] = '0';
-    buff[len++] = lua_getlocaledecpoint();
-    while (zeros-- > 0)
-      buff[len++] = '0';
-    for (i = 0; i < ndigits; i++)
-      buff[len++] = cast_char('0' + digits[i]);
-  }
-  buff[len] = '\0';
-  return len;
-#else
-  (void)n;
-  (void)buff;
-  (void)precision;
-  return -1;
 #endif
-}
-
-
-static int tostringbuffFloat (lua_Number n, char *buff) {
   /* first conversion */
   int len = l_sprintf(buff, LUA_N2SBUFFSZ, LUA_NUMBER_FMT,
                             (LUAI_UACNUMBER)n);
-  if (len < 0) {  /* snprintf does not support this conversion */
-    lua_Number check;
-    const char *end;
-    len = fallbackFloatToString(n, buff, 7);
-    end = l_str2dloc(buff, &check, 'n');
-    if (end == NULL || *end != '\0' || check != n)
-      len = fallbackFloatToString(n, buff, 9);
-  }
-  else if (lua_str2number(buff, NULL) != n) {  /* not enough precision? */
+  lua_Number check = lua_str2number(buff, NULL);  /* read it back */
+  if (check != n) {  /* not enough precision? */
     /* convert again with more precision */
     len = l_sprintf(buff, LUA_N2SBUFFSZ, LUA_NUMBER_FMT_N,
                           (LUAI_UACNUMBER)n);
-    if (len < 0)
-      len = fallbackFloatToString(n, buff, 9);
   }
   /* looks like an integer? */
   if (buff[strspn(buff, "-0123456789")] == '\0') {

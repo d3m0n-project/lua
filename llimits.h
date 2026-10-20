@@ -238,7 +238,30 @@ typedef unsigned long l_uint32;
 
 /* float division */
 #if !defined(luai_numdiv)
-#define luai_numdiv(L,a,b)      ((void)L, (a)/(b))
+static inline lua_Number lua_numdiv (lua_Number a, lua_Number b) {
+#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
+  union { lua_Number n; unsigned int u; } ua, ub;
+  ua.n = a;
+  ub.n = b;
+  if ((ub.u & 0x7fffffffU) == 0) {
+    if ((ua.u & 0x7fffffffU) == 0)
+      return (lua_Number)__builtin_nanf("");
+    return ((ua.u ^ ub.u) & 0x80000000U)
+             ? (lua_Number)-__builtin_inff()
+             : (lua_Number)__builtin_inff();
+  }
+#else
+  if (b == 0) {
+    if (a == 0)
+      return (lua_Number)__builtin_nanf("");
+    return (__builtin_signbit(a) == __builtin_signbit(b))
+             ? (lua_Number)__builtin_inff()
+             : (lua_Number)-__builtin_inff();
+  }
+#endif
+  return a / b;
+}
+#define luai_numdiv(L,a,b)      ((void)L, lua_numdiv((a), (b)))
 #endif
 
 /*
@@ -260,8 +283,13 @@ typedef unsigned long l_uint32;
 
 /* exponentiation */
 #if !defined(luai_numpow)
+#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
+lua_Number lua_floatpow (lua_Number a, lua_Number b);
+#define luai_numpow(L,a,b)  ((void)L, lua_floatpow((a),(b)))
+#else
 #define luai_numpow(L,a,b)  \
   ((void)L, (b == 2) ? (a)*(a) : l_mathop(pow)(a,b))
+#endif
 #endif
 
 /* the others are quite standard operations */
@@ -270,11 +298,46 @@ typedef unsigned long l_uint32;
 #define luai_numsub(L,a,b)      ((void)L, (a)-(b))
 #define luai_nummul(L,a,b)      ((void)L, (a)*(b))
 #define luai_numunm(L,a)        ((void)L, -(a))
+#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
+static inline unsigned int lua_numfloatbits (lua_Number n) {
+  union { lua_Number n; unsigned int u; } value;
+  value.n = n;
+  return value.u;
+}
+static inline int lua_numfloatnan (lua_Number n) {
+  unsigned int bits = lua_numfloatbits(n);
+  return (bits & 0x7f800000U) == 0x7f800000U &&
+         (bits & 0x007fffffU) != 0;
+}
+static inline int lua_numfloateq (lua_Number a, lua_Number b) {
+  unsigned int ua = lua_numfloatbits(a);
+  unsigned int ub = lua_numfloatbits(b);
+  if (lua_numfloatnan(a) || lua_numfloatnan(b)) return 0;
+  return ua == ub || ((ua & 0x7fffffffU) == 0 &&
+                      (ub & 0x7fffffffU) == 0);
+}
+static inline int lua_numfloatlt (lua_Number a, lua_Number b) {
+  unsigned int ua = lua_numfloatbits(a);
+  unsigned int ub = lua_numfloatbits(b);
+  unsigned int sa = ua & 0x80000000U;
+  unsigned int sb = ub & 0x80000000U;
+  if (lua_numfloatnan(a) || lua_numfloatnan(b)) return 0;
+  if ((ua & 0x7fffffffU) == 0 && (ub & 0x7fffffffU) == 0) return 0;
+  if (sa != sb) return sa != 0;
+  return sa ? ua > ub : ua < ub;
+}
+#define luai_numeq(a,b)         lua_numfloateq((a),(b))
+#define luai_numlt(a,b)         lua_numfloatlt((a),(b))
+#define luai_numle(a,b)         (lua_numfloateq((a),(b)) || lua_numfloatlt((a),(b)))
+#define luai_numgt(a,b)         lua_numfloatlt((b),(a))
+#define luai_numge(a,b)         (lua_numfloateq((a),(b)) || lua_numfloatlt((b),(a)))
+#else
 #define luai_numeq(a,b)         ((a)==(b))
 #define luai_numlt(a,b)         ((a)<(b))
 #define luai_numle(a,b)         ((a)<=(b))
 #define luai_numgt(a,b)         ((a)>(b))
 #define luai_numge(a,b)         ((a)>=(b))
+#endif
 #define luai_numisnan(a)        (!luai_numeq((a), (a)))
 #endif
 

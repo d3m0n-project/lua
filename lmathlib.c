@@ -19,7 +19,49 @@
 
 #include "lauxlib.h"
 #include "lualib.h"
+#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
+/* The target math header's builtin wrappers recurse at -O0.  Rename them
+** while including it so calls below resolve to the real libm symbols. */
+#define sinf lua_sdk_sinf
+#define cosf lua_sdk_cosf
+#define tanf lua_sdk_tanf
+#define asinf lua_sdk_asinf
+#define acosf lua_sdk_acosf
+#define atan2f lua_sdk_atan2f
+#define sqrtf lua_sdk_sqrtf
+#define ceilf lua_sdk_ceilf
+#define logf lua_sdk_logf
+#define log2f lua_sdk_log2f
+#define log10f lua_sdk_log10f
+#define expf lua_sdk_expf
+#endif
 #include "llimits.h"
+#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
+#undef sinf
+#undef cosf
+#undef tanf
+#undef asinf
+#undef acosf
+#undef atan2f
+#undef sqrtf
+#undef ceilf
+#undef logf
+#undef log2f
+#undef log10f
+#undef expf
+extern float sinf (float);
+extern float cosf (float);
+extern float tanf (float);
+extern float asinf (float);
+extern float acosf (float);
+extern float atan2f (float, float);
+extern float sqrtf (float);
+extern float ceilf (float);
+extern float logf (float);
+extern float log2f (float);
+extern float log10f (float);
+extern float expf (float);
+#endif
 
 
 #undef PI
@@ -44,49 +86,8 @@ static int math_sin (lua_State *L) {
 }
 
 
-#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
-/*
-** Avoid target cosf implementations that are only compiler-builtin wrappers
-** and recurse back into themselves. Reduce the input to [-pi/2, pi/2] and
-** evaluate a Taylor polynomial there.
-*/
-static lua_Number lua_cos_float (lua_Number x) {
-  const lua_Number pi = l_mathop(3.14159265358979323846);
-  lua_Number sign = l_mathop(1.0);
-  lua_Number z;
-  lua_Number p;
-  x = l_mathop(fmod)(x, l_mathop(2.0) * pi);
-  if (x > pi)
-    x -= l_mathop(2.0) * pi;
-  else if (x < -pi)
-    x += l_mathop(2.0) * pi;
-  if (x > pi / l_mathop(2.0)) {
-    x = pi - x;
-    sign = -sign;
-  }
-  else if (x < -pi / l_mathop(2.0)) {
-    x = -pi - x;
-    sign = -sign;
-  }
-  z = x * x;
-  p = -l_mathop(1.0) / l_mathop(87178291200.0);
-  p = l_mathop(1.0) / l_mathop(479001600.0) + z * p;
-  p = -l_mathop(1.0) / l_mathop(3628800.0) + z * p;
-  p = l_mathop(1.0) / l_mathop(40320.0) + z * p;
-  p = -l_mathop(1.0) / l_mathop(720.0) + z * p;
-  p = l_mathop(1.0) / l_mathop(24.0) + z * p;
-  p = -l_mathop(0.5) + z * p;
-  return sign * (l_mathop(1.0) + z * p);
-}
-#endif
-
-
 static int math_cos (lua_State *L) {
-#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
-  lua_pushnumber(L, lua_cos_float(luaL_checknumber(L, 1)));
-#else
   lua_pushnumber(L, l_mathop(cos)(luaL_checknumber(L, 1)));
-#endif
   return 1;
 }
 
@@ -97,14 +98,35 @@ static int math_tan (lua_State *L) {
 }
 
 
+#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
+static int math_outofunit (lua_Number x) {
+  union { lua_Number n; unsigned int u; } value;
+  value.n = x;
+  return (value.u & 0x7fffffffU) > 0x3f800000U;
+}
+#endif
+
+
 static int math_asin (lua_State *L) {
-  lua_pushnumber(L, l_mathop(asin)(luaL_checknumber(L, 1)));
+  lua_Number x = luaL_checknumber(L, 1);
+#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
+  lua_pushnumber(L, math_outofunit(x) ? (lua_Number)__builtin_nanf("")
+                                      : l_mathop(asin)(x));
+#else
+  lua_pushnumber(L, l_mathop(asin)(x));
+#endif
   return 1;
 }
 
 
 static int math_acos (lua_State *L) {
-  lua_pushnumber(L, l_mathop(acos)(luaL_checknumber(L, 1)));
+  lua_Number x = luaL_checknumber(L, 1);
+#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
+  lua_pushnumber(L, math_outofunit(x) ? (lua_Number)__builtin_nanf("")
+                                      : l_mathop(acos)(x));
+#else
+  lua_pushnumber(L, l_mathop(acos)(x));
+#endif
   return 1;
 }
 
@@ -201,7 +223,25 @@ static int math_modf (lua_State *L) {
 
 
 static int math_sqrt (lua_State *L) {
-  lua_pushnumber(L, l_mathop(sqrt)(luaL_checknumber(L, 1)));
+  lua_Number x = luaL_checknumber(L, 1);
+#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
+  union { lua_Number n; unsigned int u; } value;
+  value.n = x;
+  if ((value.u & 0x7f800000U) == 0x7f800000U) {
+    if ((value.u & 0x007fffffU) != 0)
+      x = (lua_Number)__builtin_nanf("");
+    else if ((value.u & 0x80000000U) == 0)
+      x = (lua_Number)__builtin_inff();
+    else
+      x = (lua_Number)__builtin_nanf("");
+  }
+  else if ((value.u & 0x80000000U) != 0 &&
+           (value.u & 0x7fffffffU) != 0)
+    x = (lua_Number)__builtin_nanf("");
+  else
+#endif
+    x = l_mathop(sqrt)(x);
+  lua_pushnumber(L, x);
   return 1;
 }
 
@@ -217,8 +257,25 @@ static int math_ult (lua_State *L) {
 static int math_log (lua_State *L) {
   lua_Number x = luaL_checknumber(L, 1);
   lua_Number res;
-  if (lua_isnoneornil(L, 2))
+  if (lua_isnoneornil(L, 2)) {
+#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
+    union { lua_Number n; unsigned int u; } value;
+    value.n = x;
+    if ((value.u & 0x7fffffffU) == 0)
+      res = -(lua_Number)__builtin_inff();
+    else if ((value.u & 0x7f800000U) == 0x7f800000U) {
+      if ((value.u & 0x007fffffU) != 0 ||
+          (value.u & 0x80000000U) != 0)
+        res = (lua_Number)__builtin_nanf("");
+      else
+        res = (lua_Number)__builtin_inff();
+    }
+    else if ((value.u & 0x80000000U) != 0)
+      res = (lua_Number)__builtin_nanf("");
+    else
+#endif
     res = l_mathop(log)(x);
+  }
   else {
     lua_Number base = luaL_checknumber(L, 2);
 #if !defined(LUA_USE_C89)
@@ -237,7 +294,26 @@ static int math_log (lua_State *L) {
 
 
 static int math_exp (lua_State *L) {
-  lua_pushnumber(L, l_mathop(exp)(luaL_checknumber(L, 1)));
+  lua_Number x = luaL_checknumber(L, 1);
+#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
+  union { lua_Number n; unsigned int u; } value;
+  value.n = x;
+  if ((value.u & 0x7f800000U) == 0x7f800000U) {
+    if ((value.u & 0x007fffffU) != 0)
+      x = (lua_Number)__builtin_nanf("");
+    else if ((value.u & 0x80000000U) == 0)
+      x = (lua_Number)__builtin_inff();
+    else
+      x = 0;
+  }
+  else if (x >= 89.0f)
+    x = (lua_Number)__builtin_inff();
+  else if (x <= -104.0f)
+    x = 0;
+  else
+#endif
+    x = l_mathop(exp)(x);
+  lua_pushnumber(L, x);
   return 1;
 }
 

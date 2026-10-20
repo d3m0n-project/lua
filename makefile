@@ -111,7 +111,7 @@ LUA_O=	lua.o
 
 
 ALL_T= $(CORE_T) $(LUA_T)
-ALL_O= $(CORE_O) $(LUA_O) $(AUX_O) $(LIB_O) $(CUSTOM_LIBS_O)
+ALL_O= $(CORE_O) $(LUA_O) $(AUX_O) $(LIB_O) $(CUSTOM_LIBS_O) d3m0n_syscalls.o
 ALL_A= $(CORE_T)
 
 all:	$(ALL_T)
