@@ -77,7 +77,7 @@ LOCAL = $(TESTS) $(CWARNS)
 # For C89, "-std=c89 -DLUA_USE_C89"
 # Note that Linux/Posix options are not compatible with C89
 # (For 32-bit, add option "-m32" to MYCFLAGS and MYLDFLAGS.)
-MYCFLAGS= $(LOCAL) -std=c99 -DLUA_USE_LINUX -DLUA_32BITS
+MYCFLAGS= $(LOCAL) -std=c99 -DLUA_USE_LINUX -DLUA_32BITS -O0 -g
 MYLDFLAGS= -Wl,-E
 MYLIBS= #-ldl
 
