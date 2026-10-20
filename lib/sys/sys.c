@@ -288,6 +288,7 @@ static const luaL_Reg sys_functions[] = {
 
 static const luaL_Reg c_functions[] = {
 	{"c_buffer_uint32_set", l_c_buffer_uint32_set},
+	{"c_buffer_buf_uint32_set", l_c_buffer_mul_uint32_set},
 	{NULL, NULL}
 };
 
