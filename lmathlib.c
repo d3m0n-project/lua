@@ -44,8 +44,49 @@ static int math_sin (lua_State *L) {
 }
 
 
+#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
+/*
+** Avoid target cosf implementations that are only compiler-builtin wrappers
+** and recurse back into themselves. Reduce the input to [-pi/2, pi/2] and
+** evaluate a Taylor polynomial there.
+*/
+static lua_Number lua_cos_float (lua_Number x) {
+  const lua_Number pi = l_mathop(3.14159265358979323846);
+  lua_Number sign = l_mathop(1.0);
+  lua_Number z;
+  lua_Number p;
+  x = l_mathop(fmod)(x, l_mathop(2.0) * pi);
+  if (x > pi)
+    x -= l_mathop(2.0) * pi;
+  else if (x < -pi)
+    x += l_mathop(2.0) * pi;
+  if (x > pi / l_mathop(2.0)) {
+    x = pi - x;
+    sign = -sign;
+  }
+  else if (x < -pi / l_mathop(2.0)) {
+    x = -pi - x;
+    sign = -sign;
+  }
+  z = x * x;
+  p = -l_mathop(1.0) / l_mathop(87178291200.0);
+  p = l_mathop(1.0) / l_mathop(479001600.0) + z * p;
+  p = -l_mathop(1.0) / l_mathop(3628800.0) + z * p;
+  p = l_mathop(1.0) / l_mathop(40320.0) + z * p;
+  p = -l_mathop(1.0) / l_mathop(720.0) + z * p;
+  p = l_mathop(1.0) / l_mathop(24.0) + z * p;
+  p = -l_mathop(0.5) + z * p;
+  return sign * (l_mathop(1.0) + z * p);
+}
+#endif
+
+
 static int math_cos (lua_State *L) {
+#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT
+  lua_pushnumber(L, lua_cos_float(luaL_checknumber(L, 1)));
+#else
   lua_pushnumber(L, l_mathop(cos)(luaL_checknumber(L, 1)));
+#endif
   return 1;
 }
 
