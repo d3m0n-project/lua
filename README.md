@@ -3,6 +3,9 @@
 
 This repository is a fork of `https://github.com/lua/lua`, for d3m0n os.
 
+> [!WARNING]
+> This repo may not be updated often. Please create an [issue](https://github.com/d3m0n-project/lua/issues) for each missing feature and report vulnerabilities to maintain devices security.
+
 ## Compilation
 
 ```bash
@@ -19,3 +22,6 @@ make export
 ```
 
 The compiled lua executable will be automatically placed in `/programs/bin/`
+
+## TODO List
+- [ ] Handle threading
