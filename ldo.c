@@ -9,7 +9,7 @@
 
 #include "lprefix.h"
 
-#include "runtime.h"
+#include "runtime/runtime.h"
 #include "stdlib.h"
 
 #include "lua.h"

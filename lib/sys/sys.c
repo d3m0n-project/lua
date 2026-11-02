@@ -108,11 +108,15 @@ static int l_getdents(lua_State *L)
 		return luaL_argerror(L, 2, "invalid buffer length");
 
 	size_t len = (size_t)n;
-	char *buffer = malloc(len ? len : 1);
-	if (!buffer)
-		return luaL_error(L, "out of memory");
+	char *buffer = NULL;
 
-	int ret = getdents(path, buffer, (uint32_t)len);
+	if (len > 0) {
+		buffer = malloc(len);
+		if (!buffer)
+			return luaL_error(L, "out of memory");
+	}
+
+	int ret = getdents(path, &buffer, (uint32_t)len);
 	if (ret < 0)
 		lua_pushnil(L);
 	else
