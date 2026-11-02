@@ -12,7 +12,7 @@ This repository is a fork of `https://github.com/lua/lua`, for d3m0n os.
 make
 ```
 
-You need to have `d3c` installed on your machine. Check [here](../../../compiler/README.md) for more information.
+You need to have `d3c` installed on your machine. Check [here](https://github.com/d3m0n-project/d3m0n_os/tree/main/compiler/README.md) for more information.
 
 
 ## Installation
